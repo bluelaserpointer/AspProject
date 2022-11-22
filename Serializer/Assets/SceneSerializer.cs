@@ -14,6 +14,22 @@ public class SceneSerializer : MonoBehaviour
     {
         [SerializeField]
         public List<ObjData> objDatas;
+        [SerializeField]
+        public List<ModelData> modelDatas;
+    }
+    [System.Serializable]
+    public struct ObjData
+    {
+        public string name;
+        public JsonVector3 position;
+        public JsonVector3 eulerAngles;
+        public JsonVector3 localScale;
+        public int modelID;
+    }
+    [System.Serializable]
+    public struct ModelData
+    {
+        public string resourcePath;
     }
     [System.Serializable]
     public struct JsonVector3
@@ -33,14 +49,6 @@ public class SceneSerializer : MonoBehaviour
         {
             return string.Format("{0:F4}", value.ToString());
         }
-    }
-    [System.Serializable]
-    public struct ObjData
-    {
-        public string name;
-        public JsonVector3 position;
-        public JsonVector3 eulerAngles;
-        public JsonVector3 localScale;
     }
     public void DoSerialize()
     {
