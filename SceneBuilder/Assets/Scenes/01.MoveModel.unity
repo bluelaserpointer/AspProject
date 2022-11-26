@@ -240,7 +240,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   axisRoot: {fileID: 319453772}
-  speed: 5
+  speed: 25
+  axisDisplayDistance: 0.25
   m_model: {fileID: 1234429387}
 --- !u!1 &372476950
 GameObject:

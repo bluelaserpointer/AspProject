@@ -6,12 +6,14 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// 通过拖动小坐标轴 移动模型
 /// </summary>
-public class ControlAxisParent : MonoBehaviour
+public class ControlAxisManager : MonoBehaviour
 {
     [SerializeField]
     Transform axisRoot;
     [SerializeField]
-    float speed = 5;
+    float speed = 25F;
+    [SerializeField]
+    float axisDisplayDistance = 0.25F;
 
     #region 字段
     //模型
@@ -47,6 +49,10 @@ public class ControlAxisParent : MonoBehaviour
                 MovingModel();
             }
         }
+        //axis display transform update
+        Vector3 cameraPosition = GameManager.SceneCamera.transform.position;
+        axisRoot.position = cameraPosition + (m_model.position - cameraPosition).normalized * axisDisplayDistance;
+        m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
     }
     #endregion
 
@@ -75,20 +81,20 @@ public class ControlAxisParent : MonoBehaviour
         {
             case AxisState.X:
                 Transform x = axisRoot.Find("X");
-                Vector3 screenDir = Camera.main.WorldToScreenPoint(x.forward);
+                //Vector3 screenDir = Camera.main.WorldToScreenPoint(x.forward);
                 float similar = Vector3.Dot(mouseWorldDir, x.forward);
                 similarVec = new Vector3(similar, 0, 0);
 
                 break;
             case AxisState.Y:
                 Transform y = axisRoot.Find("Y");
-                screenDir = Camera.main.WorldToScreenPoint(y.forward);
+                //screenDir = Camera.main.WorldToScreenPoint(y.forward);
                 similar = Vector3.Dot(mouseWorldDir, y.forward);
                 similarVec = new Vector3(0, similar, 0);
                 break;
             case AxisState.Z:
                 Transform z = axisRoot.Find("Z");
-                screenDir = Camera.main.WorldToScreenPoint(z.forward);
+                //screenDir = Camera.main.WorldToScreenPoint(z.forward);
                 similar = Vector3.Dot(mouseWorldDir, z.forward);
                 similarVec = new Vector3(0, 0, similar);
                 break;
@@ -96,8 +102,6 @@ public class ControlAxisParent : MonoBehaviour
         }
         Vector3 offset = speed * similarVec * Time.deltaTime;
         m_model.position += offset;
-        axisRoot.position += offset;
-        m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
     }
 
     //完成本次移动
