@@ -7,9 +7,13 @@ public class BuildItem : SceneObject
 {
     public string modelPath;
 
-    public override void OnSceneMouseClick()
+    public void Highlight()
     {
         GameManager.HighlightedBuildItem = this;
+    }
+    public override void OnSceneMouseClick()
+    {
+        Highlight();
     }
 
     public override void OnSceneMouseDown()

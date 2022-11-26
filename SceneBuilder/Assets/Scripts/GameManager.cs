@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     BuildItemMoveController _itemMoveController;
     
     public static GameManager Instance { get; private set; }
-    public static Transform Transform => Instance._buildItemRoot;
+    public static Transform BuildItemRoot => Instance._buildItemRoot;
     public static SceneView SceneView => Instance._sceneView;
     public static SceneCameraManager SceneCameraManager => Instance._sceneCameraManager;
     public static BuildItemMoveController ControlAxis => Instance._itemMoveController;
