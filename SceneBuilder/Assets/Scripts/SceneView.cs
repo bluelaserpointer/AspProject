@@ -34,6 +34,8 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     }
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0) && MouseRaycastingObject == null)
+            GameManager.HighlightedBuildItem = null;
     }
     public void OnPointerMove(PointerEventData eventData)
     {
@@ -45,6 +47,7 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
 
         Ray sceneMouseRay = GameManager.SceneCamera.ScreenPointToRay(MouseScreenPos);
         bool foundRaycastHit = false;
+        //Check build item controller before any build item
         foreach (Collider collider in GameManager.ControlAxis.GetComponentsInChildren<Collider>())
         {
             SceneObject sceneObject = collider.GetComponent<SceneObject>();
@@ -59,7 +62,27 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
                 }
             }
         }
-        if(!foundRaycastHit)
+        if (!foundRaycastHit)
+        {
+            float closestDistance = float.MaxValue;
+            SceneObject closestObject = null;
+            foreach (RaycastHit hitInfo in Physics.RaycastAll(sceneMouseRay))
+            {
+                SceneObject sceneObject = hitInfo.collider.GetComponent<SceneObject>();
+                if (sceneObject != null && hitInfo.distance < closestDistance)
+                {
+                    closestDistance = hitInfo.distance;
+                    closestObject = sceneObject;
+                    break;
+                }
+            }
+            if(closestObject != null)
+            {
+                MouseRaycastingObject = closestObject;
+                foundRaycastHit = true;
+            }
+        }
+        if (!foundRaycastHit)
         {
             MouseRaycastingObject = null;
         }

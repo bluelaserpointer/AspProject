@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// 通过拖动小坐标轴 移动模型
 /// </summary>
-public class ControlAxisManager : MonoBehaviour
+public class BuildItemMoveController : MonoBehaviour
 {
     [SerializeField]
     Transform axisRoot;
@@ -16,11 +16,17 @@ public class ControlAxisManager : MonoBehaviour
     float axisDisplayDistance = 0.25F;
 
     #region 字段
-    //模型
-    public Transform m_model;
-    //坐标轴颜色 分别对应x、y、z、选中轴
+    /// <summary>
+    /// 控制中的物体
+    /// </summary>
+    BuildItem ControllingBuildItem => GameManager.HighlightedBuildItem;
+    /// <summary>
+    /// 坐标轴颜色 分别对应x、y、z、选中轴
+    /// </summary>
     Color[] m_axisColors = new Color[] { Color.red, Color.green, Color.blue, Color.yellow };
-    //是否正在移动物体
+    /// <summary>
+    /// 是否正在移动物体
+    /// </summary>
     public bool IsMovingModel { get; private set; }
     //上一帧鼠标位置
     Vector3 m_lastMouseWorldPos;
@@ -49,10 +55,18 @@ public class ControlAxisManager : MonoBehaviour
                 MovingModel();
             }
         }
-        //axis display transform update
-        Vector3 cameraPosition = GameManager.SceneCamera.transform.position;
-        axisRoot.position = cameraPosition + (m_model.position - cameraPosition).normalized * axisDisplayDistance;
-        m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
+        //update axis display
+        if(ControllingBuildItem == null)
+        {
+            axisRoot.gameObject.SetActive(false);
+        }
+        else
+        {
+            axisRoot.gameObject.SetActive(true);
+            Vector3 cameraPosition = GameManager.SceneCamera.transform.position;
+            axisRoot.position = cameraPosition + (ControllingBuildItem.transform.position - cameraPosition).normalized * axisDisplayDistance;
+            m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
+        }
     }
     #endregion
 
@@ -101,7 +115,7 @@ public class ControlAxisManager : MonoBehaviour
             default: break;
         }
         Vector3 offset = speed * similarVec * Time.deltaTime;
-        m_model.position += offset;
+        ControllingBuildItem.transform.position += offset;
     }
 
     //完成本次移动

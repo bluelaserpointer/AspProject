@@ -16,12 +16,13 @@ public class SceneCameraManager : MonoBehaviour
     [Tooltip("旋转视角时相机y轴转速")]
     float yRotateSpeed = 250.0f;
 
-    [Header("References")]
-    [Tooltip("相机跟随的目标物体，一般是一个空物体")]
-    public Transform target;
+    //[Header("References")]
+    //[Tooltip("相机跟随的目标物体，一般是一个空物体")]
+    //public Transform target;
 
     public Camera Camera { get; private set; }
 
+    /*
     private float Distance = 5; //相机和target之间的距离，因为相机的Z轴总是指向target，也就是相机z轴方向上的距离
 
     private int MouseWheelSensitivity = 1; //滚轮灵敏度设置
@@ -36,7 +37,7 @@ public class SceneCameraManager : MonoBehaviour
 
     private Vector3 initScreenPos; //中键刚按下时鼠标的屏幕坐标（第三个值其实没什么用）
     private Vector3 curScreenPos; //当前鼠标的屏幕坐标（第三个值其实没什么用）
-
+    */
     private Vector2 cameraEular;
     private void Awake()
     {
@@ -48,7 +49,7 @@ public class SceneCameraManager : MonoBehaviour
         var angles = transform.eulerAngles;
         cameraEular.x = angles.y;
         cameraEular.y = angles.x;
-        CameraTargetPosition = target.position;
+        //CameraTargetPosition = target.position;
         //transform.rotation = Quaternion.Euler(cameraEular.y + 60, cameraEular.x, 0); //设置相机姿态
         //Vector3 position = transform.rotation * new Vector3(0.0F, 0.0F, -Distance) + CameraTargetPosition; //四元数表示一个旋转，四元数乘以向量相当于把向量旋转对应角度，然后加上目标物体的位置就是相机位置了
         //transform.position = transform.rotation * new Vector3(0, 0, -Distance) + CameraTargetPosition; //设置相机位置
