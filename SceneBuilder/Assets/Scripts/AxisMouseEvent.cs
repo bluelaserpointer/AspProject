@@ -2,27 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AxisMouseEvent : MonoBehaviour
+public class AxisMouseEvent : SceneObject
 {
-    Transform m_gameManager;
-    void Start()
+    public override void OnSceneMouseEnter()
     {
-        m_gameManager = GameObject.Find("GameManager").transform;
+        transform.parent.SendMessage("MoseHoverEnter",gameObject.name);
     }
-
-     void OnMouseEnter()
+    public override void OnSceneMouseExit()
     {
-        m_gameManager.SendMessage("MoseHoverEnter",gameObject.name);
+        transform.parent.SendMessage("MouseHoverExis", gameObject.name);
     }
-
-     void OnMouseDown()
+    public override void OnSceneMouseDown()
     {
-        m_gameManager.SendMessage("MouseDown", gameObject.name);
+        transform.parent.SendMessage("MouseDown", gameObject.name);
     }
-
-     void OnMouseExit()
+    public override void OnSceneMouseClick()
     {
-        m_gameManager.SendMessage("MouseHoverExis", gameObject.name);
     }
-
+    public override void OnSceneMouseUp()
+    {
+    }
 }

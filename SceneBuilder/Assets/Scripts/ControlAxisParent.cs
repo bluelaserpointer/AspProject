@@ -1,29 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 通过拖动小坐标轴 移动模型
 /// </summary>
-public class MoveModel : MonoBehaviour
+public class ControlAxisParent : MonoBehaviour
 {
-    #region 常量
-    //移动速度
-    const float MOVE_SPEED = 10F;
-    #endregion
-    public float speed = 5;
+    [SerializeField]
+    Transform axisRoot;
+    [SerializeField]
+    float speed = 5;
 
     #region 字段
     //模型
     public Transform m_model;
-    //坐标轴
-    Transform m_axis;
     //坐标轴颜色 分别对应x、y、z、选中轴
     Color[] m_axisColors = new Color[] { Color.red, Color.green, Color.blue, Color.yellow };
     //是否正在移动物体
-    bool m_isMoveModel = false;
+    public bool IsMovingModel { get; private set; }
     //上一帧鼠标位置
-    Vector3 m_lastMousePos;
+    Vector3 m_lastMouseWorldPos;
     //当前选中坐标轴
     AxisState m_axisState = AxisState.Idle;
     //坐标轴的三个轴
@@ -38,17 +36,17 @@ public class MoveModel : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButton(0) && m_isMoveModel)
+        if(IsMovingModel)
         {
-            MovingModel();
+            if (Input.GetMouseButtonUp(0))
+            {
+                MoveComplete();
+            }
+            else
+            {
+                MovingModel();
+            }
         }
-        //移动完成
-        else if (Input.GetMouseButtonUp(0) && m_isMoveModel)
-        {
-
-            MoveComplete();
-        }
-
     }
     #endregion
 
@@ -56,12 +54,9 @@ public class MoveModel : MonoBehaviour
     //初始化
     void Initialized()
     {
-        //m_model = this.transform;// GameObject.Find("Player").transform;
-        m_axis = GameObject.Find("Axis").transform;
-
-        for (int i = 0; i < m_axis.childCount; i++)
+        for (int i = 0; i < axisRoot.childCount; i++)
         {
-            m_xyz[i] = m_axis.GetChild(i);
+            m_xyz[i] = axisRoot.GetChild(i);
         }
         //坐标轴颜色初始化
         m_xyz[0].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[0]);
@@ -71,49 +66,44 @@ public class MoveModel : MonoBehaviour
     //移动
     void MovingModel()
     {
-        //鼠标在屏幕上的方向
-        Vector3 mouseDir = Input.mousePosition - m_lastMousePos;
-        Vector3 currentPos = Input.mousePosition;
-        //鼠标坐标转世界坐标
-        Vector3 startWorld = Camera.main.ScreenToWorldPoint(new Vector3(m_lastMousePos.x, m_lastMousePos.y, 1));
-        Vector3 endWorld = Camera.main.ScreenToWorldPoint(new Vector3(currentPos.x, currentPos.y, 1));
-        Vector3 mouseWorldDir = (endWorld - startWorld);
+        Vector3 currentMouseWorldPos = GameManager.SceneView.MouseWorldPos;
+        Vector3 mouseWorldDir = currentMouseWorldPos - m_lastMouseWorldPos;
 
-        Vector3 offset = Vector3.zero;
-        Vector3 axisStart = Camera.main.WorldToScreenPoint(m_axis.position);
+        Vector3 similarVec = Vector3.zero;
+        Vector3 axisStart = Camera.main.WorldToScreenPoint(axisRoot.position);
         switch (m_axisState)
         {
             case AxisState.X:
-                Transform x = m_axis.Find("X");
+                Transform x = axisRoot.Find("X");
                 Vector3 screenDir = Camera.main.WorldToScreenPoint(x.forward);
                 float similar = Vector3.Dot(mouseWorldDir, x.forward);
-                offset = new Vector3(similar * Time.deltaTime * MOVE_SPEED, 0, 0);
+                similarVec = new Vector3(similar, 0, 0);
 
                 break;
             case AxisState.Y:
-                Transform y = m_axis.Find("Y");
+                Transform y = axisRoot.Find("Y");
                 screenDir = Camera.main.WorldToScreenPoint(y.forward);
                 similar = Vector3.Dot(mouseWorldDir, y.forward);
-                offset = new Vector3(0, similar * Time.deltaTime * MOVE_SPEED, 0);
+                similarVec = new Vector3(0, similar, 0);
                 break;
             case AxisState.Z:
-                Transform z = m_axis.Find("Z");
+                Transform z = axisRoot.Find("Z");
                 screenDir = Camera.main.WorldToScreenPoint(z.forward);
                 similar = Vector3.Dot(mouseWorldDir, z.forward);
-                offset = new Vector3(0, 0, similar * Time.deltaTime * MOVE_SPEED);
+                similarVec = new Vector3(0, 0, similar);
                 break;
             default: break;
         }
-        m_model.position += speed*offset;
-        m_axis.position += speed*offset;
-
-        m_lastMousePos = Input.mousePosition;
+        Vector3 offset = speed * similarVec * Time.deltaTime;
+        m_model.position += offset;
+        axisRoot.position += offset;
+        m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
     }
 
     //完成本次移动
     void MoveComplete()
     {
-        m_isMoveModel = false;
+        IsMovingModel = false;
 
         switch (m_axisState)
         {
@@ -135,7 +125,7 @@ public class MoveModel : MonoBehaviour
     //鼠标悬浮坐标轴 黄色材质
     void MoseHoverEnter(string axisName)
     {
-        if (!m_isMoveModel)
+        if (!IsMovingModel)
         {
             switch (axisName)
             {
@@ -154,7 +144,7 @@ public class MoveModel : MonoBehaviour
 
     void MouseHoverExis(string axisName)
     {
-        if (!m_isMoveModel)
+        if (!IsMovingModel)
         {
             switch (axisName)
             {
@@ -174,8 +164,8 @@ public class MoveModel : MonoBehaviour
     //选中坐标轴
     void MouseDown(string axisName)
     {
-        m_isMoveModel = true;
-        m_lastMousePos = Input.mousePosition;
+        IsMovingModel = true;
+        m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
         switch (axisName)
         {
             case "X":
