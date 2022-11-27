@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class TreeViewTest : MonoBehaviour 
+public class TreeViewTest : MonoBehaviour
 {
-    public TreeViewControl treeView;    // 显示在unity中的参数
+    public  TreeViewControl treeView;    // 显示在unity中的参数
+    // public  PanelViewControl panelView;
 
     
     // TreeViewControl - 不用考虑层级关系 & ns 直接引用
@@ -14,6 +15,7 @@ public class TreeViewTest : MonoBehaviour
 	{
         //生成数据 TreeViewDada from where
         List<TreeViewData> datas = new List<TreeViewData>();
+        // List<PanelViewData> panelDatas = new List<PanelViewData>();
 
         TreeViewData data = new TreeViewData();
         data.Name = "Root Folder";
@@ -78,29 +80,94 @@ public class TreeViewTest : MonoBehaviour
         treeView.RefreshTreeView();
         //注册子元素的鼠标点击事件
         treeView.ClickItemEvent += CallBack;
+
+/*        PanelViewData panelData = new PanelViewData();
+        panelData.Name = "Root Folder";
+        panelData.ParentID = -1;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 1 Folder";
+        panelData.ParentID = 0;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 1 Folder";
+        panelData.ParentID = 0;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 2 Folder";
+        panelData.ParentID = 1;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 2 Folder";
+        panelData.ParentID = 2;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 2 Folder";
+        panelData.ParentID = 1;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 3 Folder";
+        panelData.ParentID = 3;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 3 Folder";
+        panelData.ParentID = 3;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 4 Folder";
+        panelData.ParentID = 7;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "Level 4 Folder";
+        panelData.ParentID = 7;
+        panelDatas.Add(panelData);
+
+        panelData = new PanelViewData();
+        panelData.Name = "File";
+        panelData.ParentID = 8;
+        panelDatas.Add(panelData);
+
+        //指定数据源
+        panelView.Data = panelDatas;
+        //重新生成树形菜单
+        panelView.GeneratePanelView();
+        //刷新树形菜单
+        panelView.RefreshPanelView();
+        //注册子元素的鼠标点击事件
+        // panelView.ClickItemEvent += CallBack;*/
     }
 
     void Update()
     {
         //判断树形菜单中名为“ Root Folder ”的元素是否被勾选
-        if (Input.GetKeyDown(KeyCode.A))    // 用A判断？
+/*        if (Input.GetKeyDown(KeyCode.A))    // 用A判断？
         {
             bool isCheck = treeView.ItemIsCheck("Root Folder");
             Debug.Log("当前树形菜单中的元素 Root Folder " + (isCheck?"已被选中！":"未被选中！"));
-        }
+        }*/
         //获取树形菜单中所有被勾选的元素
-        if (Input.GetKeyDown(KeyCode.S))
+/*        if (Input.GetKeyDown(KeyCode.S))
         {
             List<string> items = treeView.ItemsIsCheck();
             for (int i = 0; i < items.Count; i++)
             {
                 Debug.Log("当前树形菜单中被选中的元素有：" + items[i]);
             }
-        }
+        }*/
     }
 
     void CallBack(GameObject item)
     {
         Debug.Log("点击了 " + item.transform.Find("TreeViewText").GetComponent<Text>().text);
     }
+
 }
