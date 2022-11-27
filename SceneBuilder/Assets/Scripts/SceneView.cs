@@ -5,11 +5,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(RawImage))]
 public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
-    public RawImage RawImage { get; private set; }
-    public RectTransform RectTransform => RawImage.rectTransform;
+    [SerializeField]
+    RawImage _sceneRenderImage;
+    public RectTransform RectTransform => _sceneRenderImage.rectTransform;
     public bool IsMouseEnter { get; private set; }
 
     public Vector2 MouseScreenPos { get; private set; }
@@ -28,10 +28,6 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     }
     SceneObject _mouseRaycastingObject;
 
-    private void Awake()
-    {
-        RawImage = GetComponent<RawImage>();
-    }
     private void Update()
     {
     }
