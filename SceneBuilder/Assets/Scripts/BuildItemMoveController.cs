@@ -19,7 +19,7 @@ public class BuildItemMoveController : MonoBehaviour
     /// <summary>
     /// 控制中的物体
     /// </summary>
-    BuildItem ControllingBuildItem => GameManager.HighlightedBuildItem;
+    List<BuildItem> ControllingBuildItems => GameManager.SelectedBuildItems;
     /// <summary>
     /// 坐标轴颜色 分别对应x、y、z、选中轴
     /// </summary>
@@ -56,15 +56,21 @@ public class BuildItemMoveController : MonoBehaviour
             }
         }
         //update axis display
-        if(ControllingBuildItem == null)
+        if(ControllingBuildItems.Count == 0)
         {
             axisRoot.gameObject.SetActive(false);
         }
         else
         {
+            Vector3 controlCentre = Vector3.zero;
+            foreach(var item in ControllingBuildItems)
+            {
+                controlCentre += item.transform.position;
+            }
+            controlCentre /= ControllingBuildItems.Count;
             axisRoot.gameObject.SetActive(true);
             Vector3 cameraPosition = GameManager.SceneCamera.transform.position;
-            axisRoot.position = cameraPosition + (ControllingBuildItem.transform.position - cameraPosition).normalized * axisDisplayDistance;
+            axisRoot.position = cameraPosition + (controlCentre - cameraPosition).normalized * axisDisplayDistance;
             m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
         }
     }
@@ -115,7 +121,8 @@ public class BuildItemMoveController : MonoBehaviour
             default: break;
         }
         Vector3 offset = speed * similarVec * Time.deltaTime;
-        ControllingBuildItem.transform.position += offset;
+        foreach(var item in ControllingBuildItems)
+            item.transform.position += offset;
     }
 
     //完成本次移动

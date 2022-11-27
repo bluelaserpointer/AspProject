@@ -17,13 +17,17 @@ public class HierarchyView : MonoBehaviour
             BuildItemUITag tag = Instantiate(_buildItemUITagPrefab, _buildItemUITagRoot);
             tag.SetItem(buildItemTransform.GetComponent<BuildItem>());
         }
-        GameManager.OnHighlightChange.AddListener((oldItem, newItem) =>
+        GameManager.OnBuildItemHighlightChange.AddListener((oldItem, newItem) =>
         {
-            FindTag(oldItem)?.SetHighlight(false);
-            FindTag(newItem)?.SetHighlight(true);
+            FindBuildItemUITag(oldItem)?.SetHighlightState(false);
+            FindBuildItemUITag(newItem)?.SetHighlightState(true);
+        });
+        GameManager.OnBuildItemSelect.AddListener((item, cond) =>
+        {
+            FindBuildItemUITag(item).SetSelectState(cond);
         });
     }
-    private BuildItemUITag FindTag(BuildItem buildItem)
+    private BuildItemUITag FindBuildItemUITag(BuildItem buildItem)
     {
         if(buildItem == null)
             return null;

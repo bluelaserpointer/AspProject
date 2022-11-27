@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     public static SceneCameraManager SceneCameraManager => Instance._sceneCameraManager;
     public static BuildItemMoveController ControlAxis => Instance._itemMoveController;
     public static Camera SceneCamera => SceneCameraManager.Camera;
+    public static List<BuildItem> SelectedBuildItems => Instance._selectedBuildItems;
     public static BuildItem HighlightedBuildItem
     {
         get => Instance._highlightedBuildItem;
@@ -30,16 +31,42 @@ public class GameManager : MonoBehaviour
             {
                 BuildItem old = Instance._highlightedBuildItem;
                 Instance._highlightedBuildItem = value;
-                OnHighlightChange.Invoke(old, value);
+                OnBuildItemHighlightChange.Invoke(old, value);
             }
         }
     }
-    public static UnityEvent<BuildItem, BuildItem> OnHighlightChange => Instance.onHighlightChange;
+    public static UnityEvent<BuildItem, BuildItem> OnBuildItemHighlightChange => Instance._onBuildItemHighlightChange;
+    public static UnityEvent<BuildItem, bool> OnBuildItemSelect => Instance._onBuildItemSelect;
 
     BuildItem _highlightedBuildItem;
-    readonly UnityEvent<BuildItem, BuildItem> onHighlightChange = new UnityEvent<BuildItem, BuildItem>();
+    readonly UnityEvent<BuildItem, BuildItem> _onBuildItemHighlightChange = new UnityEvent<BuildItem, BuildItem>();
+    readonly UnityEvent<BuildItem, bool> _onBuildItemSelect = new UnityEvent<BuildItem, bool>();
+    readonly List<BuildItem> _selectedBuildItems = new List<BuildItem>();
     private void Awake()
     {
         Instance = this;
+    }
+    public static void SelectBuildItem(BuildItem buildItem)
+    {
+        if(!SelectedBuildItems.Contains(buildItem))
+        {
+            SelectedBuildItems.Add(buildItem);
+            OnBuildItemSelect.Invoke(buildItem, true);
+        }
+    }
+    public static bool DeselectBuildItem(BuildItem buildItem)
+    {
+        if(SelectedBuildItems.Remove(buildItem))
+        {
+            OnBuildItemSelect.Invoke(buildItem, false);
+            return true;
+        }
+        return false;
+    }
+    public static void DeselectAllBuildItems()
+    {
+        foreach (var item in SelectedBuildItems)
+            OnBuildItemSelect.Invoke(item, false);
+        SelectedBuildItems.Clear();
     }
 }

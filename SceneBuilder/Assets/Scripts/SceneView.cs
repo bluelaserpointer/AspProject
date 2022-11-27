@@ -34,8 +34,6 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     }
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && MouseRaycastingObject == null)
-            GameManager.HighlightedBuildItem = null;
     }
     public void OnPointerMove(PointerEventData eventData)
     {
@@ -93,7 +91,15 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     }
     public void OnPointerDown(PointerEventData eventData)
     {
-        MouseRaycastingObject?.OnSceneMouseDown();
+        if (MouseRaycastingObject != null)
+        {
+            MouseRaycastingObject.OnSceneMouseDown();
+        }
+        else
+        {
+            GameManager.HighlightedBuildItem = null;
+            GameManager.DeselectAllBuildItems();
+        }
     }
     public void OnPointerUp(PointerEventData eventData)
     {

@@ -7,12 +7,18 @@ using UnityEngine.UI;
 public class BuildItemUITag : MonoBehaviour
 {
     [SerializeField]
+    Image selectImage;
+    [SerializeField]
     Image highlightImage;
     [SerializeField]
     Text itemNameText;
 
     public BuildItem BuildItem { get; private set; }
-    public void SetHighlight(bool cond)
+    public void SetSelectState(bool cond)
+    {
+        selectImage.enabled = cond;
+    }
+    public void SetHighlightState(bool cond)
     {
         highlightImage.enabled = cond;
     }
@@ -23,6 +29,18 @@ public class BuildItemUITag : MonoBehaviour
     }
     public void OnClick()
     {
-        BuildItem.Highlight();
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            //multi-select
+        }
+        else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            //TODO: multi-select in list
+        }
+        else
+        {
+            GameManager.DeselectAllBuildItems();
+        }
+        BuildItem.SelectAndHighlight();
     }
 }
