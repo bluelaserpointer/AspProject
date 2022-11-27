@@ -11,13 +11,19 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     SceneView _sceneView;
     [SerializeField]
+    HierarchyView _hierarchyView;
+    [SerializeField]
+    InspectorView _inspectorView;
+    [SerializeField]
     SceneCameraManager _sceneCameraManager;
     [SerializeField]
     BuildItemMoveController _itemMoveController;
-    
+
     public static GameManager Instance { get; private set; }
     public static Transform BuildItemRoot => Instance._buildItemRoot;
     public static SceneView SceneView => Instance._sceneView;
+    public static HierarchyView HierarchyView => Instance._hierarchyView;
+    public static InspectorView InspectorView => Instance._inspectorView;
     public static SceneCameraManager SceneCameraManager => Instance._sceneCameraManager;
     public static BuildItemMoveController ControlAxis => Instance._itemMoveController;
     public static Camera SceneCamera => SceneCameraManager.Camera;

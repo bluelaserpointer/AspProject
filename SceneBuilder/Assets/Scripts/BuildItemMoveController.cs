@@ -123,6 +123,7 @@ public class BuildItemMoveController : MonoBehaviour
         Vector3 offset = speed * similarVec * Time.deltaTime;
         foreach(var item in ControllingBuildItems)
             item.transform.position += offset;
+        GameManager.InspectorView.UpdateInspector();
     }
 
     //完成本次移动

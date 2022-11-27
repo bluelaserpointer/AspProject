@@ -25,7 +25,11 @@ public class BuildItemUITag : MonoBehaviour
     public void SetItem(BuildItem buildItem)
     {
         BuildItem = buildItem;
-        itemNameText.text = buildItem.name;
+        UpdateName();
+    }
+    public void UpdateName()
+    {
+        itemNameText.text = BuildItem.name;
     }
     public void OnClick()
     {

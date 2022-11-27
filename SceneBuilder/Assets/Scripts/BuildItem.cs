@@ -7,6 +7,7 @@ public class BuildItem : SceneObject
 {
     public string modelPath;
 
+    public BuildItemUITag UITag => GameManager.HierarchyView.FindBuildItemUITag(this); //TODO: bind ui tag on initialize 
     public void SelectAndHighlight()
     {
         Select();

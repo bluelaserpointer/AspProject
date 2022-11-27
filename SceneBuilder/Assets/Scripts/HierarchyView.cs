@@ -27,7 +27,7 @@ public class HierarchyView : MonoBehaviour
             FindBuildItemUITag(item).SetSelectState(cond);
         });
     }
-    private BuildItemUITag FindBuildItemUITag(BuildItem buildItem)
+    public BuildItemUITag FindBuildItemUITag(BuildItem buildItem)
     {
         if(buildItem == null)
             return null;
