@@ -42,7 +42,7 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
         Ray sceneMouseRay = GameManager.SceneCamera.ScreenPointToRay(MouseScreenPos);
         bool foundRaycastHit = false;
         //Check build item controller before any build item
-        foreach (Collider collider in GameManager.ControlAxis.GetComponentsInChildren<Collider>())
+        foreach (Collider collider in GameManager.BuildItemTransformController.GetComponentsInChildren<Collider>())
         {
             SceneObject sceneObject = collider.GetComponent<SceneObject>();
             if (sceneObject != null)

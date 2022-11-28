@@ -57,7 +57,7 @@ public class SceneCameraManager : MonoBehaviour
 
     void Update()
     {
-        if(!GameManager.ControlAxis.IsMovingModel)
+        if(!GameManager.BuildItemTransformController.IsMovingModel)
         {
             //平移
             if (Input.GetMouseButton(2))

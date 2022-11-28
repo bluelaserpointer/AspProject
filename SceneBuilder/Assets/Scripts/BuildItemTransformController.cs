@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// 通过拖动小坐标轴 移动模型
 /// </summary>
-public class BuildItemMoveController : MonoBehaviour
+public class BuildItemTransformController : MonoBehaviour
 {
     [SerializeField]
     Transform axisRoot;
@@ -39,7 +39,38 @@ public class BuildItemMoveController : MonoBehaviour
     #region unity回调
     void Start()
     {
-        Initialized();
+        for (int i = 0; i < axisRoot.childCount; i++)
+        {
+            m_xyz[i] = axisRoot.GetChild(i);
+        }
+        //坐标轴颜色初始化
+        m_xyz[0].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[0]);
+        m_xyz[1].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[1]);
+        m_xyz[2].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[2]);
+
+        axisRoot.gameObject.SetActive(false);
+        GameManager.OnBuildItemSelect.AddListener((item, cond) =>
+        {
+            if(!cond)
+                item.transform.SetParent(GameManager.BuildItemRoot);
+            if (ControllingBuildItems.Count == 0)
+            {
+                axisRoot.gameObject.SetActive(false);
+            }
+            else
+            {
+                axisRoot.gameObject.SetActive(true);
+                //TODO: improvable
+                Vector3 sumPos = Vector3.zero;
+                ControllingBuildItems.ForEach(eachItem =>
+                {
+                    eachItem.transform.SetParent(GameManager.BuildItemRoot);
+                    sumPos += eachItem.transform.position;
+                });
+                transform.position = sumPos / ControllingBuildItems.Count;
+                ControllingBuildItems.ForEach(eachItem => eachItem.transform.SetParent(transform));
+            }
+        });
     }
 
     void Update()
@@ -56,39 +87,16 @@ public class BuildItemMoveController : MonoBehaviour
             }
         }
         //update axis display
-        if(ControllingBuildItems.Count == 0)
+        if(ControllingBuildItems.Count > 0)
         {
-            axisRoot.gameObject.SetActive(false);
-        }
-        else
-        {
-            Vector3 controlCentre = Vector3.zero;
-            foreach(var item in ControllingBuildItems)
-            {
-                controlCentre += item.transform.position;
-            }
-            controlCentre /= ControllingBuildItems.Count;
-            axisRoot.gameObject.SetActive(true);
             Vector3 cameraPosition = GameManager.SceneCamera.transform.position;
-            axisRoot.position = cameraPosition + (controlCentre - cameraPosition).normalized * axisDisplayDistance;
+            axisRoot.position = cameraPosition + (transform.position - cameraPosition).normalized * axisDisplayDistance;
             m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
         }
     }
     #endregion
 
     #region 方法
-    //初始化
-    void Initialized()
-    {
-        for (int i = 0; i < axisRoot.childCount; i++)
-        {
-            m_xyz[i] = axisRoot.GetChild(i);
-        }
-        //坐标轴颜色初始化
-        m_xyz[0].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[0]);
-        m_xyz[1].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[1]);
-        m_xyz[2].GetComponent<MeshRenderer>().material.SetColor("_Color", m_axisColors[2]);
-    }
     //移动
     void MovingModel()
     {
@@ -121,9 +129,8 @@ public class BuildItemMoveController : MonoBehaviour
             default: break;
         }
         Vector3 offset = speed * similarVec * Time.deltaTime;
-        foreach(var item in ControllingBuildItems)
-            item.transform.position += offset;
-        GameManager.InspectorView.UpdateInspector();
+        transform.position += offset;
+        GameManager.InspectorView.BuildItemInspector.UpdateInspector();
     }
 
     //完成本次移动

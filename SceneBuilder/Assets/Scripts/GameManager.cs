@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
@@ -17,7 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     SceneCameraManager _sceneCameraManager;
     [SerializeField]
-    BuildItemMoveController _itemMoveController;
+    BuildItemTransformController _buildItemTransformController;
 
     public static GameManager Instance { get; private set; }
     public static Transform BuildItemRoot => Instance._buildItemRoot;
@@ -25,7 +26,7 @@ public class GameManager : MonoBehaviour
     public static HierarchyView HierarchyView => Instance._hierarchyView;
     public static InspectorView InspectorView => Instance._inspectorView;
     public static SceneCameraManager SceneCameraManager => Instance._sceneCameraManager;
-    public static BuildItemMoveController ControlAxis => Instance._itemMoveController;
+    public static BuildItemTransformController BuildItemTransformController => Instance._buildItemTransformController;
     public static Camera SceneCamera => SceneCameraManager.Camera;
     public static List<BuildItem> SelectedBuildItems => Instance._selectedBuildItems;
     public static BuildItem HighlightedBuildItem
@@ -52,27 +53,9 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
     }
-    public static void SelectBuildItem(BuildItem buildItem)
-    {
-        if(!SelectedBuildItems.Contains(buildItem))
-        {
-            SelectedBuildItems.Add(buildItem);
-            OnBuildItemSelect.Invoke(buildItem, true);
-        }
-    }
-    public static bool DeselectBuildItem(BuildItem buildItem)
-    {
-        if(SelectedBuildItems.Remove(buildItem))
-        {
-            OnBuildItemSelect.Invoke(buildItem, false);
-            return true;
-        }
-        return false;
-    }
     public static void DeselectAllBuildItems()
     {
-        foreach (var item in SelectedBuildItems)
-            OnBuildItemSelect.Invoke(item, false);
-        SelectedBuildItems.Clear();
+        foreach (var item in SelectedBuildItems.ToArray())
+            item.Deselect();
     }
 }

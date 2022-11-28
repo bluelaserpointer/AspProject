@@ -1,25 +1,41 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 [DisallowMultipleComponent]
 public class BuildItem : SceneObject
 {
     public string modelPath;
 
-    public BuildItemUITag UITag => GameManager.HierarchyView.FindBuildItemUITag(this); //TODO: bind ui tag on initialize 
+    public BuildItemUITag UITag => GameManager.HierarchyView.FindBuildItemUITag(this); //TODO: bind ui tag on initialize
+    private void Awake()
+    {
+        gameObject.tag = "BuildItem";
+    }
     public void SelectAndHighlight()
     {
         Select();
         GameManager.HighlightedBuildItem = this;
     }
-    public void Select()
+    public bool Select()
     {
-        GameManager.SelectBuildItem(this);
+        if (!GameManager.SelectedBuildItems.Contains(this))
+        {
+            GameManager.SelectedBuildItems.Add(this);
+            GameManager.OnBuildItemSelect.Invoke(this, true);
+            return true;
+        }
+        return false;
     }
-    public void Deselect()
+    public bool Deselect()
     {
-        GameManager.DeselectBuildItem(this);
+        if (GameManager.SelectedBuildItems.Remove(this))
+        {
+            GameManager.OnBuildItemSelect.Invoke(this, false);
+            return true;
+        }
+        return false;
     }
     public override void OnSceneMouseClick()
     {
