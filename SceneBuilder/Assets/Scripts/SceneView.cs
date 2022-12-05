@@ -13,6 +13,7 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     public bool IsMouseEnter { get; private set; }
 
     public Vector2 MouseScreenPos { get; private set; }
+    public Ray MouseRay { get; private set; }
     public Vector3 MouseWorldPos { get; private set; }
     public SceneObject MouseRaycastingObject
     {
@@ -39,16 +40,16 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
         MouseScreenPos = outMouseSceneScreenPos;
         MouseWorldPos = GameManager.SceneCamera.ScreenToWorldPoint(new Vector3(MouseScreenPos.x, MouseScreenPos.y, 5));
 
-        Ray sceneMouseRay = GameManager.SceneCamera.ScreenPointToRay(MouseScreenPos);
+        MouseRay = GameManager.SceneCamera.ScreenPointToRay(MouseScreenPos);
         bool foundRaycastHit = false;
-        //Check build item controller before any build item
+        //Check item controller before items
         foreach (Collider collider in GameManager.BuildItemTransformController.GetComponentsInChildren<Collider>())
         {
             SceneObject sceneObject = collider.GetComponent<SceneObject>();
             if (sceneObject != null)
             {
                 RaycastHit hitInfo;
-                if (collider.Raycast(sceneMouseRay, out hitInfo, float.MaxValue))
+                if (collider.Raycast(MouseRay, out hitInfo, float.MaxValue))
                 {
                     MouseRaycastingObject = sceneObject;
                     foundRaycastHit = true;
@@ -60,7 +61,7 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
         {
             float closestDistance = float.MaxValue;
             SceneObject closestObject = null;
-            foreach (RaycastHit hitInfo in Physics.RaycastAll(sceneMouseRay))
+            foreach (RaycastHit hitInfo in Physics.RaycastAll(MouseRay))
             {
                 SceneObject sceneObject = hitInfo.collider.GetComponent<SceneObject>();
                 if (sceneObject != null && hitInfo.distance < closestDistance)

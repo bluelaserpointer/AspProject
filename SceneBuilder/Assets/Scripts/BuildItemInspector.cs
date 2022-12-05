@@ -15,7 +15,7 @@ public class BuildItemInspector : MonoBehaviour
 
     BuildItem HighlightedBuildItem => GameManager.HighlightedBuildItem;
     List<BuildItem> SelectedBuildItems => GameManager.SelectedBuildItems;
-    BuildItemTransformController BuildItemTransformController => GameManager.BuildItemTransformController;
+    BuildItemTransformTool BuildItemTransformController => GameManager.BuildItemTransformController;
 
     private void Start()
     {

@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     SceneCameraManager _sceneCameraManager;
     [SerializeField]
-    BuildItemTransformController _buildItemTransformController;
+    BuildItemTransformTool _buildItemTransformController;
 
     public static GameManager Instance { get; private set; }
     public static Transform BuildItemRoot => Instance._buildItemRoot;
@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     public static HierarchyView HierarchyView => Instance._hierarchyView;
     public static InspectorView InspectorView => Instance._inspectorView;
     public static SceneCameraManager SceneCameraManager => Instance._sceneCameraManager;
-    public static BuildItemTransformController BuildItemTransformController => Instance._buildItemTransformController;
+    public static BuildItemTransformTool BuildItemTransformController => Instance._buildItemTransformController;
     public static Camera SceneCamera => SceneCameraManager.Camera;
     public static List<BuildItem> SelectedBuildItems => Instance._selectedBuildItems;
     public static BuildItem HighlightedBuildItem
