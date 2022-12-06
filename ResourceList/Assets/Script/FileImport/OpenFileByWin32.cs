@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 
 public class OpenFileByWin32 : MonoBehaviour
 {
+    //List<ResourceItem> ResourceItemList => GameManager.ResourceItems;
+
     public void OpenFile()
     {
         FileOpenDialog dialog = new FileOpenDialog();
@@ -34,7 +36,11 @@ public class OpenFileByWin32 : MonoBehaviour
         {
             Debug.Log(dialog.file);
             // 插入TreeViewControl
-            RenderFileList.renderFileList.AddFile(dialog.file);
+            ResourceItem item = new ResourceItem();
+            item.Path = dialog.file;
+            item.Name = dialog.fileTitle;
+            item.isFolder = false;
+            GameManager.ResourceItems.Add(item);
         }
     }
 }

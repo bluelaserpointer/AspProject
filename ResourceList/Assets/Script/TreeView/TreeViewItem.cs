@@ -1,41 +1,40 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-/// <summary>
-/// 树形菜单元素
-/// </summary>
+
 public class TreeViewItem : MonoBehaviour
 {
-    /// <summary>
-    /// 树形菜单控制器
-    /// </summary>
-    public TreeViewControl Controler;
-    /// <summary>
-    /// 当前元素的子元素是否展开（展开时可见）
-    /// </summary>
+
+    [SerializeField]
+    GameObject _menuItem;
+
     public bool IsExpanding = false;
 
-    //当前元素在树形图中所属的层级
     private int _hierarchy = 0;
-    //当前元素指向的父元素
+
     private TreeViewItem _parent;
-    //当前元素的所有子元素
+
     private List<TreeViewItem> _children;
-    //正在进行刷新
+
     private bool _isRefreshing = false;
 
-    void Awake()
+
+
+    //public UnityEvent leftClick;
+    //public UnityEvent rightClick;
+
+    private void Start()
     {
-        //上下文按钮点击回调 抓取元件 为元件添加监听
-        transform.Find("ContextButton").GetComponent<Button>().onClick.AddListener(ContextButtonClick);
-/*        transform.Find("TreeViewButton").GetComponent<Button>().onClick.AddListener(delegate () {
-            Controler.ClickItem(gameObject);
-        });*/
+        //leftClick.AddListener(new UnityAction(ButtonLeftClick));
+        //rightClick.AddListener(new UnityAction(ButtonRightClick));
     }
-    /// <summary>
-    /// 点击上下文菜单按钮，元素的子元素改变显示状态
-    /// </summary>
-    void ContextButtonClick()
+
+    private void Update()
+    {
+
+    }
+
+    public void ContextButtonClick()
     {
         //上一轮刷新还未结束
         if (_isRefreshing)
@@ -45,9 +44,10 @@ public class TreeViewItem : MonoBehaviour
 
         _isRefreshing = true;
 
+        Debug.Log("click icon, isExpanding:" + IsExpanding);
         if (IsExpanding)
         {
-            transform.Find("ContextButton").GetComponent<RectTransform>().localRotation = Quaternion.Euler(0, 0, 90);   // 三角icon 
+            transform.Find("ContextButton").GetComponent<RectTransform>().localRotation = Quaternion.Euler(0, 0, 90);
             IsExpanding = false;
             ChangeChildren(this, false);
         }
@@ -59,14 +59,12 @@ public class TreeViewItem : MonoBehaviour
         }
 
         //刷新树形菜单
-        Controler.RefreshTreeView();
+        //GameManager.TreeView.RefreshTreeView();
 
         _isRefreshing = false;
     }
-    /// <summary>
-    /// 改变某一元素所有子元素的显示状态
-    /// </summary>
-    void ChangeChildren(TreeViewItem tvi, bool value)
+    
+    public void ChangeChildren(TreeViewItem tvi, bool value)
     {
         for (int i = 0; i < tvi.GetChildrenNumber(); i++)
         {
@@ -75,6 +73,25 @@ public class TreeViewItem : MonoBehaviour
             {
                 ChangeChildren(tvi.GetChildrenByIndex(i), value);
             }
+        }
+    }
+
+    public void OnClick()
+    {
+        Debug.Log("Click");
+        if (Input.GetMouseButtonDown(0))
+        {
+            // select
+            _menuItem.SetActive(false);
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            // open menu
+            float x = Input.mousePosition.x;
+            float y = Input.mousePosition.y;
+            float z = Input.mousePosition.z;
+            _menuItem.transform.position = new Vector3(x, y, z);
+            _menuItem.SetActive(true);
         }
     }
 
