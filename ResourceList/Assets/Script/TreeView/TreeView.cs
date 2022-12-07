@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-//using UnityEngine.Events;
-//using UnityEngine.EventSystems;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 [DisallowMultipleComponent]
-public class TreeView : MonoBehaviour
+public class TreeView : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField]
     Transform _treeItemRoot;
     [SerializeField]
     GameObject _treeItemPrefab;
-    
+    [SerializeField]
+    GameObject _menuItem;
+
 
     private List<ResourceItem> _resourceItems => GameManager.ResourceItems;
     private List<GameObject> _treeViewItems = null;
@@ -20,7 +22,7 @@ public class TreeView : MonoBehaviour
 
     private bool _isRefreshing = false;
 
-    //public UnityEvent rightClick;
+    public UnityEvent leftClick;
 
     //树形菜单当前刷新队列的元素最大层级
     private int _hierarchy = 0;
@@ -29,7 +31,7 @@ public class TreeView : MonoBehaviour
     {
         GenerateTreeView();
 
-        //rightClick.AddListener(new UnityAction(ButtonRightClick));
+        leftClick.AddListener(new UnityAction(ButtonLeftClick));
 
         //GameManager.OnResourceItemHighlightChange.AddListener((oldItem, newItem) =>
         //{
@@ -44,33 +46,34 @@ public class TreeView : MonoBehaviour
 
     private void Update()
     {
-        RefreshTreeView();
-        //GenerateTreeView();
-        
+        // RefreshTreeView();
+        // GenerateTreeView();
+
     }
 
-    //public void OnPointerClick(PointerEventData eventData)
-    //{
-    //    if (eventData.button == PointerEventData.InputButton.Right)
-    //    {
-    //        rightClick.Invoke();
-    //    }
-    //}
-
-    //private void ButtonRightClick()
-    //{
-    //    Debug.Log("Button Right Click");
-    //    // OPEN MENU
-    //}
-
-    private void CreateNewFolder()
+    public void OnPointerClick(PointerEventData eventData)
     {
-        
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            leftClick.Invoke();
+        }
+    }
+
+    private void ButtonLeftClick()
+    {
+        //this.HideMenu();
+    }
+
+    public void CreateNewFolder()
+    {
+        ResourceItem item = new ResourceItem();
+        item.Name = "Folder";
+        item.isFolder = true;
+        GameManager.ResourceItems.Add(item);
     }
 
     public void GenerateTreeView()
     {
-        //删除可能已经存在的树形菜单元素
         if (_treeViewItems != null)
         {
             for (int i = 0; i < _treeViewItems.Count; i++)
@@ -79,7 +82,7 @@ public class TreeView : MonoBehaviour
             }
             _treeViewItems.Clear();
         }
-        //重新创建树形菜单元素
+
         _treeViewItems = new List<GameObject>();
         List<ResourceItem> rootItems = _resourceItems.FindAll(item => item.Hierarchy == 0);
 
@@ -110,7 +113,6 @@ public class TreeView : MonoBehaviour
 
     public void RefreshTreeView()
     {
-        //上一轮刷新还未结束
         if (_isRefreshing)
         {
             return;
@@ -118,26 +120,22 @@ public class TreeView : MonoBehaviour
 
         _isRefreshing = true;
 
-        //复制一份菜单
         _treeViewItemsClone = new List<GameObject>(_treeViewItems);
 
-        //用复制的菜单进行刷新计算
+
         for (int i = 0; i < _treeViewItemsClone.Count; i++)
         {
-            //已经计算过或者不需要计算位置的元素
-            if (_treeViewItemsClone[i] == null || !_treeViewItemsClone[i].activeSelf)   // activeSelf 物体的active状态
+            if (_treeViewItemsClone[i] == null || !_treeViewItemsClone[i].activeSelf)   
             {
                 continue;
             }
 
             TreeViewItem tvi = _treeViewItemsClone[i].GetComponent<TreeViewItem>();
-
             if (tvi.GetHierarchy() > _hierarchy)
             {
-                _hierarchy = tvi.GetHierarchy();
+                _hierarchy = tvi.GetHierarchy();    // 更新一个最大hierarchy?
             }
 
-            //如果子元素是展开的，继续向下刷新
             if (tvi.IsExpanding)
             {
                 RefreshTreeViewChild(tvi);
@@ -146,7 +144,6 @@ public class TreeView : MonoBehaviour
             _treeViewItemsClone[i] = null;
         }
 
-        //清空复制的菜单
         _treeViewItemsClone.Clear();
 
         _isRefreshing = false;
@@ -161,7 +158,6 @@ public class TreeView : MonoBehaviour
                 _hierarchy = tvi.GetChildrenByIndex(i).GetHierarchy();
             }
 
-            //如果子元素是展开的，继续向下刷新
             if (tvi.GetChildrenByIndex(i).IsExpanding)
             {
                 RefreshTreeViewChild(tvi.GetChildrenByIndex(i));
@@ -175,6 +171,14 @@ public class TreeView : MonoBehaviour
         }
     }
 
+    public void HideMenu()
+    {
+        for (int i = 0; i < _treeViewItems.Count; i++)
+        {
+            TreeViewItem tvi = _treeViewItems[i].GetComponent<TreeViewItem>();
+            tvi.HideMenu();
+        }
+    }
 
     //public TreeViewItem FindTreeViewItem(ResourceItem resourceItem)
     //{

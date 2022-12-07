@@ -61,7 +61,7 @@ public class PanelView : MonoBehaviour
         _panelViewItems = new List<GameObject>();
         List<ResourceItem> selectItems = _resourceItems.FindAll(item => item.ParentID != 0);
 
-        for (int i = 0; i < selectItems.Count; i++)
+        for (int i = 0; i < _resourceItems.Count; i++)
         {
             GameObject panelItem = Instantiate(_panelItemPrefab, _panelItemRoot);
 

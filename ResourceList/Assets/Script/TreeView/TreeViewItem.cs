@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
-public class TreeViewItem : MonoBehaviour
+public class TreeViewItem : MonoBehaviour, IPointerClickHandler
 {
 
     [SerializeField]
-    GameObject _menuItem;
+    GameObject _menuPrefab;
 
     public bool IsExpanding = false;
 
@@ -18,25 +20,21 @@ public class TreeViewItem : MonoBehaviour
 
     private bool _isRefreshing = false;
 
+    public UnityEvent leftClick;
+    public UnityEvent rightClick;
 
-
-    //public UnityEvent leftClick;
-    //public UnityEvent rightClick;
+    GameObject _menuItem = null;
 
     private void Start()
     {
-        //leftClick.AddListener(new UnityAction(ButtonLeftClick));
-        //rightClick.AddListener(new UnityAction(ButtonRightClick));
-    }
 
-    private void Update()
-    {
-
+        _menuItem = Instantiate(_menuPrefab, this.transform);
+        leftClick.AddListener(new UnityAction(ButtonLeftClick));
+        rightClick.AddListener(new UnityAction(ButtonRightClick));
     }
 
     public void ContextButtonClick()
     {
-        //上一轮刷新还未结束
         if (_isRefreshing)
         {
             return;
@@ -44,7 +42,6 @@ public class TreeViewItem : MonoBehaviour
 
         _isRefreshing = true;
 
-        Debug.Log("click icon, isExpanding:" + IsExpanding);
         if (IsExpanding)
         {
             transform.Find("ContextButton").GetComponent<RectTransform>().localRotation = Quaternion.Euler(0, 0, 90);
@@ -59,11 +56,11 @@ public class TreeViewItem : MonoBehaviour
         }
 
         //刷新树形菜单
-        //GameManager.TreeView.RefreshTreeView();
+        GameManager.TreeView.RefreshTreeView();
 
         _isRefreshing = false;
     }
-    
+
     public void ChangeChildren(TreeViewItem tvi, bool value)
     {
         for (int i = 0; i < tvi.GetChildrenNumber(); i++)
@@ -76,23 +73,33 @@ public class TreeViewItem : MonoBehaviour
         }
     }
 
-    public void OnClick()
+    public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("Click");
-        if (Input.GetMouseButtonDown(0))
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
-            // select
-            _menuItem.SetActive(false);
+            leftClick.Invoke();
         }
-        else if (Input.GetMouseButtonDown(1))
+        else if (eventData.button == PointerEventData.InputButton.Right)
         {
-            // open menu
-            float x = Input.mousePosition.x;
-            float y = Input.mousePosition.y;
-            float z = Input.mousePosition.z;
-            _menuItem.transform.position = new Vector3(x, y, z);
-            _menuItem.SetActive(true);
+            rightClick.Invoke();
         }
+    }
+
+    private void ButtonLeftClick()
+    {
+        //GameManager.TreeView.HideMenu();
+    }
+
+    private void ButtonRightClick()
+    {
+        // Set other menu inactive
+        GameManager.TreeView.HideMenu();
+        // open menu
+        float x = Input.mousePosition.x;
+        float y = Input.mousePosition.y;
+        float z = Input.mousePosition.z;
+        _menuItem.transform.position = new Vector3(x, y, z);
+        _menuItem.SetActive(true);
     }
 
     #region 属性访问 GetSet方法
@@ -111,6 +118,10 @@ public class TreeViewItem : MonoBehaviour
     public void SetParent(TreeViewItem parent)
     {
         _parent = parent;
+    }
+    public void HideMenu()
+    {
+        _menuItem?.SetActive(false);
     }
     public void AddChildren(TreeViewItem children)
     {
