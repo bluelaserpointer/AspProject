@@ -62,6 +62,9 @@
     <Compile Include="Assets/Scripts/AxisMouseEvent.cs" />
     <Compile Include="Assets/move.cs" />
     <Compile Include="Assets/Scripts/MoveModel.cs" />
+    <Compile Include="Assets/Scripts/startRoate.cs" />
+    <Compile Include="Assets/Scripts/RotateModel.cs" />
+    <Compile Include="Assets/Scripts/ScaleModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

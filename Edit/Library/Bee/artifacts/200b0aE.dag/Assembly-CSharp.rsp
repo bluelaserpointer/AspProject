@@ -355,6 +355,9 @@
 "Assets/Scripts/DrawSceneMesh.cs"
 "Assets/Scripts/Move.cs"
 "Assets/Scripts/MoveModel.cs"
+"Assets/Scripts/RotateModel.cs"
+"Assets/Scripts/ScaleModel.cs"
+"Assets/Scripts/startRoate.cs"
 -langversion:9.0
 
 /deterministic

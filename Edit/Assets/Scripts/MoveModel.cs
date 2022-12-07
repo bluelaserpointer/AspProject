@@ -104,9 +104,10 @@ public class MoveModel : MonoBehaviour
                 break;
             default: break;
         }
-        m_model.position += speed*offset;
-        m_axis.position += speed*offset;
-
+        m_model.position += speed * offset;
+        m_axis.position += speed * offset;
+        //m_model.transform.localEulerAngles += speed * offset;
+        //m_axis.transform.localEulerAngles += speed * offset;
         m_lastMousePos = Input.mousePosition;
     }
 
