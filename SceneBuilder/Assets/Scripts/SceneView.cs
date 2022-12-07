@@ -12,7 +12,7 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     public RectTransform RectTransform => _sceneRenderImage.rectTransform;
     public bool IsMouseEnter { get; private set; }
 
-    public Vector2 MouseScreenPos { get; private set; }
+    public Vector2 MouseUIPos { get; private set; }
     public Ray MouseRay { get; private set; }
     public Vector3 MouseWorldPos { get; private set; }
     public SceneObject MouseRaycastingObject
@@ -34,13 +34,11 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     }
     public void OnPointerMove(PointerEventData eventData)
     {
-        Vector2 outMouseSceneScreenPos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(RectTransform, eventData.position, null, out outMouseSceneScreenPos);
-        outMouseSceneScreenPos += RectTransform.rect.size / 2;
-        MouseScreenPos = outMouseSceneScreenPos;
-        MouseWorldPos = GameManager.SceneCamera.ScreenToWorldPoint(new Vector3(MouseScreenPos.x, MouseScreenPos.y, 5));
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(RectTransform, eventData.position, null, out Vector2 mouseUIPos);
+        MouseUIPos = mouseUIPos + RectTransform.rect.size / 2;
+        MouseWorldPos = GameManager.SceneCamera.ScreenToWorldPoint(new Vector3(MouseUIPos.x, MouseUIPos.y, 5));
 
-        MouseRay = GameManager.SceneCamera.ScreenPointToRay(MouseScreenPos);
+        MouseRay = GameManager.SceneCamera.ScreenPointToRay(MouseUIPos);
         bool foundRaycastHit = false;
         //Check item controller before items
         foreach (Collider collider in GameManager.BuildItemTransformController.GetComponentsInChildren<Collider>())
@@ -88,14 +86,17 @@ public class SceneView : MonoBehaviour, IPointerMoveHandler, IPointerClickHandle
     }
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (MouseRaycastingObject != null)
+        if(eventData.button == 0)
         {
-            MouseRaycastingObject.OnSceneMouseDown();
-        }
-        else
-        {
-            GameManager.HighlightedBuildItem = null;
-            GameManager.DeselectAllBuildItems();
+            if (MouseRaycastingObject != null)
+            {
+                MouseRaycastingObject.OnSceneMouseDown();
+            }
+            else
+            {
+                GameManager.HighlightedBuildItem = null;
+                GameManager.DeselectAllBuildItems();
+            }
         }
     }
     public void OnPointerUp(PointerEventData eventData)

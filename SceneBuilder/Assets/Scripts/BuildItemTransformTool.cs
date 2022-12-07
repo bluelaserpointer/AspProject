@@ -12,9 +12,11 @@ public class BuildItemTransformTool : MonoBehaviour
     /// 坐标轴颜色 分别对应x、y、z、高亮色
     /// </summary>
     [SerializeField]
+    float planeHandleHalfSize = 0.05F;
+    [SerializeField]
     Transform handleRoot;
     [SerializeField]
-    BuildItemTransformToolHandle xAxis, yAxis, zAxis, xyPlane, yzPlane, zxPlane, magnetCube;
+    BuildItemTransformToolHandle xAxis, yAxis, zAxis, xPlane, yPlane, zPlane, magnetCube;
     [SerializeField]
     float speed = 25F;
     [SerializeField]
@@ -35,8 +37,9 @@ public class BuildItemTransformTool : MonoBehaviour
     /// </summary>
     public bool IsMovingModel => ControllingAxis != null;
 
-    //上一帧鼠标位置
-    Vector3 m_lastMouseWorldPos;
+    Vector3 lastMouseDownToolPosition;
+    Plane lastMouseDownVirtualPlane;
+    Vector3 lastMouseDownVirtualPlaneStartPos;
     #endregion
 
     #region unity回调
@@ -69,57 +72,59 @@ public class BuildItemTransformTool : MonoBehaviour
 
     void Update()
     {
-        if(IsMovingModel)
-        {
-            if (Input.GetMouseButtonUp(0))
-            {
-                if(GameManager.SceneView.MouseRaycastingObject != ControllingAxis)
-                    ControllingAxis.Lit(false);
-                ControllingAxis = null;
-            }
-            else
-            {
-                Vector3 mouseWorldDir = GameManager.SceneView.MouseWorldPos - m_lastMouseWorldPos;
-                if (ControllingAxis == xAxis)
-                {
-                    transform.position += Vector3.right * Vector3.Dot(mouseWorldDir, handleRoot.Find("X").forward) * speed * Time.deltaTime;
-                }
-                else if (ControllingAxis == yAxis)
-                {
-                    transform.position += Vector3.up * Vector3.Dot(mouseWorldDir, handleRoot.Find("Y").forward) * speed * Time.deltaTime;
-                }
-                else if (ControllingAxis == zAxis)
-                {
-                    transform.position += Vector3.forward * Vector3.Dot(mouseWorldDir, handleRoot.Find("Z").forward) * speed * Time.deltaTime;
-                }
-                else if (ControllingAxis == magnetCube)
-                {
-                    BuildItem closestHitItem = null;
-                    float closestHitItemDistance = float.MaxValue;
-                    foreach (RaycastHit hitInfo in Physics.RaycastAll(GameManager.SceneView.MouseRay))
-                    {
-                        BuildItem hitItem = hitInfo.collider.GetComponent<BuildItem>();
-                        if (hitItem != null && !ControllingBuildItems.Contains(hitItem) && hitInfo.distance < closestHitItemDistance)
-                        {
-                            closestHitItemDistance = hitInfo.distance;
-                            closestHitItem = hitItem;
-                        }
-                    }
-                    if (closestHitItem != null)
-                    {
-                        Collider collider = closestHitItem.GetComponent<Collider>();
-                        //collider
-                    }
-                }
-                GameManager.InspectorView.BuildItemInspector.UpdateInspector();
-            }
-        }
-        //update axis display
         if(ControllingBuildItems.Count > 0)
         {
+            if (IsMovingModel)
+            {
+                if (Input.GetMouseButtonUp(0))
+                {
+                    if (GameManager.SceneView.MouseRaycastingObject != ControllingAxis)
+                        ControllingAxis.Lit(false);
+                    ControllingAxis = null;
+                }
+                else
+                {
+                    if (ControllingAxis == xAxis || ControllingAxis == yAxis || ControllingAxis == zAxis)
+                    {
+                        Vector3 handleForward = ControllingAxis.transform.forward;
+                        transform.position = lastMouseDownToolPosition + Vector3.Project(GetRaycastPoint(lastMouseDownVirtualPlane, GameManager.SceneView.MouseRay) - lastMouseDownVirtualPlaneStartPos, handleForward);
+                    }
+                    else if (ControllingAxis == xPlane || ControllingAxis == yPlane || ControllingAxis == zPlane)
+                    {
+                        transform.position = lastMouseDownToolPosition + GetRaycastPoint(lastMouseDownVirtualPlane, GameManager.SceneView.MouseRay) - lastMouseDownVirtualPlaneStartPos;
+                    }
+                    else if (ControllingAxis == magnetCube)
+                    {
+                        BuildItem closestHitItem = null;
+                        float closestHitItemDistance = float.MaxValue;
+                        foreach (RaycastHit hitInfo in Physics.RaycastAll(GameManager.SceneView.MouseRay))
+                        {
+                            BuildItem hitItem = hitInfo.collider.GetComponent<BuildItem>();
+                            if (hitItem != null && !ControllingBuildItems.Contains(hitItem) && hitInfo.distance < closestHitItemDistance)
+                            {
+                                closestHitItemDistance = hitInfo.distance;
+                                closestHitItem = hitItem;
+                            }
+                        }
+                        if (closestHitItem != null)
+                        {
+                            Collider collider = closestHitItem.GetComponent<Collider>();
+                            //collider
+                        }
+                    }
+                    GameManager.InspectorView.BuildItemInspector.UpdateInspector();
+                }
+            }
+            //update axis display
             Vector3 cameraPosition = GameManager.SceneCamera.transform.position;
-            handleRoot.position = cameraPosition + (transform.position - cameraPosition).normalized * axisDisplayDistance;
-            m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
+            Vector3 toolLocalPosFromCamera = GameManager.SceneCamera.transform.InverseTransformPoint(transform.position);
+            handleRoot.position = GameManager.SceneCamera.transform.TransformPoint(toolLocalPosFromCamera * axisDisplayDistance / toolLocalPosFromCamera.z);
+            int xSign = cameraPosition.x < transform.position.x ? 1 : -1; 
+            int ySign = cameraPosition.y < transform.position.y ? 1 : -1; 
+            int zSign = cameraPosition.z < transform.position.z ? 1 : -1;
+            xPlane.transform.localPosition = new Vector3(0, -ySign, zSign) * planeHandleHalfSize;
+            yPlane.transform.localPosition = new Vector3(xSign, 0, zSign) * planeHandleHalfSize;
+            zPlane.transform.localPosition = new Vector3(xSign, -ySign, 0) * planeHandleHalfSize;
         }
     }
     #endregion
@@ -131,6 +136,28 @@ public class BuildItemTransformTool : MonoBehaviour
     public void OnMouseDownControlAxis(BuildItemTransformToolHandle axis)
     {
         ControllingAxis = axis;
-        m_lastMouseWorldPos = GameManager.SceneView.MouseWorldPos;
+        lastMouseDownToolPosition = transform.position;
+
+        if (ControllingAxis == xAxis || ControllingAxis == yAxis || ControllingAxis == zAxis)
+        {
+            Vector3 handleForward = axis.transform.forward;
+            lastMouseDownVirtualPlane = GetAxisVirtualPlane(handleForward);
+            lastMouseDownVirtualPlaneStartPos = GetRaycastPoint(lastMouseDownVirtualPlane, GameManager.SceneView.MouseRay);
+        }
+        else if (ControllingAxis == xPlane || ControllingAxis == yPlane || ControllingAxis == zPlane)
+        {
+            Vector3 planeNormal = axis.transform.up;
+            lastMouseDownVirtualPlane = new Plane(planeNormal, transform.position);
+            lastMouseDownVirtualPlaneStartPos = GetRaycastPoint(lastMouseDownVirtualPlane, GameManager.SceneView.MouseRay);
+        }
+    }
+    private Plane GetAxisVirtualPlane(Vector3 axisDirection)
+    {
+        return new Plane(Vector3.Cross(axisDirection, Vector3.Cross(GameManager.SceneCamera.transform.forward, axisDirection)), transform.position);
+    }
+    private Vector3 GetRaycastPoint(Plane plane, Ray ray)
+    {
+        plane.Raycast(ray, out float enter);
+        return ray.GetPoint(enter);
     }
 }
